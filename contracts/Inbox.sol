@@ -1,14 +1,26 @@
 pragma solidity ^0.4.25;
 
-contract Inbox {
-    string public message;
+contract Conchain {
+    address public manager;
 
-    constructor(string memory initialMessage) public {
-        message = initialMessage;
+    struct User {
+        address userAddress;
+        uint aadhaarId;
+        bytes32[] projects;
     }
 
-    function setMessage(string memory newMessage) public {
-        message = newMessage;
+    struct Project {
+        string projectName;
+        address projectOwner;
+        
+    }
+
+    mapping (bytes32 => Project) public projectsList;
+
+    mapping (address => User) public usersList;
+
+    constructor() public {
+        manager = msg.sender;
     }
 }
 
