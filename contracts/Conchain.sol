@@ -12,5 +12,24 @@ contract Conchain {
 
     mapping (address => User) public userList;
 
+}
+
+contract Project {
+    address public projectOwner ;
+    string public description ;
+
+
+    /*
+
+    function getProjectBalance() public pure returns(uint256) {
+        // return address(dd).balance;
+    }
+
+    */
+
+    constructor(string) public payable{
+        projectOwner = msg.sender;
+        description = string(msg.data);
+    }
 
 }
