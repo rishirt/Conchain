@@ -4,12 +4,16 @@ contract Lottery {
     address public manager;
     address[] public players;
 
-    function enter() public payable {
-        players.push(msg.sender);
-    }
-
     constructor() public {
         manager = msg.sender;
+    }
+
+    function enter() public payable {
+        require(
+            msg.value > 0.01 ether,
+            "Please enter at least 0.01 Ether"
+        );
+        players.push(msg.sender);
     }
 }
 
