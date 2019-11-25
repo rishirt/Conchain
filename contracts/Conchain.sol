@@ -1,47 +1,22 @@
 pragma solidity ^0.4.25;
 
-contract Conchain {
-    string[] public projectList;
+contract ConchainMaster {
+    address[] public deployedProjects;
 
-    struct User {
-        string userName;
-        uint aadhaarId;
-        string[] userProjects;
-        uint reputationScore;
+    function createProject(string title) public returns(address deployedProject){
+        address newProject = new ConchainProject(title, msg.sender);
+        deployedProjects.push(newProject);
+        return newProject;
     }
-
-    mapping (address => User) public userList;
-
 }
 
-contract Project {
-    address public projectOwner ;
-    string public description ;
-    address[] public participants;
-    mapping (address => bool) allowedParticipants;
-    /*
+contract ConchainProject {
+    address public projectOwner;
+    string public projectTitle;
 
-    function getProjectBalance() public pure returns(uint256) {
-        // return address(dd).balance;
-    }
-
-    */
-
-    modifier onlyOwner {
-        require(
-            allowedParticipants[msg.sender],
-            "Only participants of a project can add new participants"
-        );
-        _;
-    }
-
-    constructor(string) public payable{
-        projectOwner = msg.sender;
-        description = string(msg.data);
-    }
-
-    function addParticipant(address) public onlyOwner {
-
+    constructor(string title, address owner) public {
+        projectTitle = title;
+        projectOwner = owner;
     }
 
 }
