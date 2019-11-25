@@ -41,8 +41,9 @@ contract Campaign {
         requests.push(newRequest);
     }
 
-    function approveRequest() {
-        
+    function approveRequest(string request) public {
+
     }
+
 }
 
