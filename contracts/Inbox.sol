@@ -1,42 +1,48 @@
 pragma solidity ^0.4.25;
 
-contract Lottery {
+contract Campaign {
     address public manager;
-    address[] public players;
+    uint public minContribution;
+    address[] public approvers;
 
-    constructor() public {
+    struct Request {
+        string description;
+        uint value;
+        address recipient;
+        bool status;
+    }
+
+    Request[] public requests;
+
+    modifier onlyManager {
+        require(msg.sender == manager,
+        "only manager can access the function");
+        _;
+    }
+
+    constructor(uint min) public {
         manager = msg.sender;
+        minContribution = min;
     }
 
-    function enter() public payable {
-        require(
-            msg.value > 0.01 ether,
-            "Please enter at least 0.01 Ether"
-        );
-        players.push(msg.sender);
-    }
-}
-
-contract Conchain {
-    address public manager;
-
-    struct User {
-        address userAddress;
-        string aadhaarId;
-        bytes32[] projects;
+    function contribute() public payable {
+        require(msg.value > minContribution,
+        "Minimum Contribution not satisifed");
+        approvers.push(msg.sender);
     }
 
-    struct Project {
-        string projectName;
-        address projectOwner;
+    function createRequest(string description, address recipient, uint value) public onlyManager {
+        Request memory newRequest = Request({
+            description: description,
+            value: value,
+            recipient: recipient,
+            status: false
+        });
+        requests.push(newRequest);
     }
 
-    mapping (bytes32 => Project) public projectsList;
-
-    mapping (address => User) public usersList;
-
-    constructor() public {
-        manager = msg.sender;
+    function approveRequest() {
+        
     }
 }
 
