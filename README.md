@@ -1,6 +1,6 @@
 This project was done as a part of my Bachelor's Thesis at IIT Madras.
 
-### Project Guide : [Dr.Ashwin Mahalingam](www.facebook.com)
+### Project Guide : [Dr.Ashwin Mahalingam](http://www.civil.iitm.ac.in/?q=ash_edu)
 
 ### Period : August 2017 - May 2018
 
