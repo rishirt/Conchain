@@ -56,11 +56,26 @@ contract ConchainMaster {
 contract ConchainProject {
     ConchainMaster masterContract;
 
+    constructor(string title, address owner, address masterAddress) public {
+        projectTitle = title;
+        projectOwner = owner;
+        masterContract = ConchainMaster(masterAddress);
+    }
+
     address public projectOwner;
     string public projectTitle;
 
     mapping(address => bool) projectParticipant;
     mapping(string => uint) channelResolver;
+    mapping(string => uint)requestResolver;
+    mapping(string => uint)channelToRequestResolver;
+
+    struct Channel {
+        string title;
+        address[] approvers;
+        uint minApproverCount;
+        mapping(address => bool) approverCheck;
+    }
 
     struct Request {
         string description;
@@ -68,14 +83,8 @@ contract ConchainProject {
         uint value;
         bool status;
         uint approvalCount;
+        string channel;
         mapping(address => bool) approvals;
-    }
-
-    struct Channel {
-        string title;
-        address[] approvers;
-        Request[] channelRequests;
-        mapping(address => bool) approverCheck;
     }
 
     Channel[] public channels;
@@ -93,58 +102,65 @@ contract ConchainProject {
         _;
     }
 
-    function createChannel(address[] approvers, string title) public onlyOwner {
+    function createChannel(address[] approvers, string title, uint minApproverCount) public onlyOwner {
         Channel memory newChannel = Channel({
             title: title,
-            approvers: approvers
+            approvers: approvers,
+            minApproverCount: minApproverCount,
         });
         channels.push(newChannel);
         uint length = channels.length;
         channelResolver[title] = length-1;
-        for (uint i=0; i<channels[length-1].approvers.length; i++){
-            channels[length-1].approverCheck[i] == true;
+        for (uint i = 0; i<channels[length-1].approvers.length; i++){
+            address temp = approvers[i];
+            channels[length-1].approverCheck[temp] == true;
         }
     }
 
-    function createRequest(string description, uint value, address recipient, string channel) public onlyMembers {
+    function createRequest(string description, string channelTitle, uint value, address recipient, string channel) public onlyMembers {
         Request memory newRequest = Request({
            description: description,
            value: value,
            recipient: recipient,
            status: false,
-           approvalCount: 0
+           approvalCount: 0,
+           channel: channelTitle
         });
         uint index = channelResolver[channel];
         channels[index].channelRequests.push(newRequest);
-        requests.push(newRequest);
+        uint requestLength = channels[index].channelRequests.length;
+        channels[index].requestResolver[description] = requestLength-1;
     }
 
-    function approveRequest(string title) {
-        uint index = channelResolver[title];
+    function approverRequest(string channelTitle, string requestTitle) {
+        uint channelIndex = channelResolver[channelTitle];
+        Channel storage currentChannel = channels[channelIndex];
         require(
-            channels[index].approverCheck[msg.sender] == true,
+            currentChannel.approverCheck[msg.sender] == true,
             "approver only method"
         );
-        
-
+        uint requestIndex = currentChannel.requestResolver[requestTitle];
+        Request storage currentRequest = currentChannel.requests[requestIndex];
+        require(
+            currentRequest.approvals[msg.sender] == false,
+            "already approved"
+        );
+        currentRequest.approvalCount++;
+        currentRequest.approvals[msg.sender] = true;
     }
 
-
-
-
-    function createRequest(string description, address recipient, uint value, ) public {
-
+    function cashRequest(string channelTitle, string requestTitle) public {
+        uint channelIndex = channelResolver[channelTitle];
+        Channel storage currentChannel = channels[channelIndex];
+        uint requestIndex = currentChannel.requestResolver[requestTitle];
+        Request storage currentRequest = currentChannel.requests[requestIndex];
+        require(currentRequest.recipient == msg.sender,
+        "only recipient method");
+        require(currentRequest.approvalCount == currentChannel.minApproverCount,
+        "number of approvals not reached");
+        msg.sender.transfer(currentRequest.value);
+        currentRequest.status = true;
     }
 
-    constructor(string title, address owner, address masterAddress) public {
-        projectTitle = title;
-        projectOwner = owner;
-        masterContract = ConchainMaster(masterAddress);
-    }
-
-
-    function createChannel(string title) onlyOwner public {
-
-    }
 }
 
